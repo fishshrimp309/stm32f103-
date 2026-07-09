@@ -1,0 +1,26 @@
+# 忽略所有层级下的编译文件夹
+**/MDK-ARM/DebugConfig/
+**/MDK-ARM/LST/
+**/MDK-ARM/OBJ/
+**/MDK-ARM/RTE/
+
+# 忽略所有层级下的库文件 (这是那1000多个文件的来源)
+**/Drivers/
+
+# 忽略所有层级下的临时文件
+**/*.o
+**/*.d
+**/*.crf
+**/*.htm
+**/*.map
+**/*.axf
+**/*.lnp
+**/*.bak
+**/*.dep
+**/*.uvgui.*
+**/*.uvoptx
+**/*.build_log.htm
+
+# 忽略 VS Code 记录
+.vscode/
+.history/
