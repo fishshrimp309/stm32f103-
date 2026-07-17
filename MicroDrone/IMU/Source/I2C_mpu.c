@@ -1,4 +1,4 @@
-#include "MPU6050/I2C.h"
+#include "MPUI2C.h"
 #include "i2c.h"
 
 static uint16_t i2c_err_cnt = 0;

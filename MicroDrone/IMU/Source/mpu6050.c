@@ -1,7 +1,7 @@
-#include "MPU6050/inv_mpu.h"
-#include "MPU6050/inv_mpu_dmp_motion_driver.h"
-#include "MPU6050/I2C.h"
-#include "MPU6050/mpu6050.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "MPUI2C.h"
+#include "mpu6050.h"
 #include "string.h" //for reset buffer
 
 #define PRINT_ACCEL     (0x01)

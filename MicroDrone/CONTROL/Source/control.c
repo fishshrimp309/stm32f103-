@@ -48,10 +48,4 @@ void Control_Flight_Loop(float t_roll, float t_pitch, float t_yaw, int16_t throt
     float yaw_out   = PID_Compute(&pid_yaw_gyro,   Target_Gyro_Yaw,   g_z);
 
 	Control_Mixer_Compute(throttle, roll_out, pitch_out, yaw_out);
-}/**
- * @brief  5ms 定时中断调用的飞控核心控制闭环
- * @param  t_roll, t_pitch, t_yaw: 遥控器给的期望角度/角速度（当前不接无线可全写 0）
- * @param  throttle: 基础油门（比如 1150us）
- * @param  c_roll, c_pitch, c_yaw: DMP 读出的当前 3 轴绝对角度
- * @param  g_x, g_y, g_z: MPU6050 读出的当前 3 轴真实角速度 (单位: °/s)
- */
+}

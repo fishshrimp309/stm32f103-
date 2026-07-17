@@ -21,9 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "MPU6050/inv_mpu.h"
-#include "MPU6050/I2C.h"
-#include "MPU6050/mpu6050.h"
+#include "inv_mpu.h"
+#include "MPUI2C.h"
+#include "mpu6050.h"
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,

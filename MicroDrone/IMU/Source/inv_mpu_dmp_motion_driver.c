@@ -15,11 +15,11 @@
  *                  differentiate among MPL and general driver function calls.
  */
 #include <string.h>
-#include "MPU6050/inv_mpu.h"
-#include "MPU6050/inv_mpu_dmp_motion_driver.h"
-#include "MPU6050/dmpKey.h"
-#include "MPU6050/dmpmap.h"
-#include "MPU6050/I2C.h"
+#include "inv_mpu.h"
+#include "inv_mpu_dmp_motion_driver.h"
+#include "dmpKey.h"
+#include "dmpmap.h"
+#include "MPUI2C.h"
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
