@@ -33,7 +33,7 @@ const int TRACKED_KEYS[] = {
     'R',            // bit 8  - Key_R
     'F',            // bit 9  - Key_F
     'Z',            // bit 10 - Key_Z
-    'X',            // bit 11 - Key_X
+    'P',            // bit 11 - Key_P
 };
 const int NUM_TRACKED_KEYS = sizeof(TRACKED_KEYS) / sizeof(TRACKED_KEYS[0]);
 

@@ -6,5 +6,6 @@
 
 void Motor_Init(void);
 void Motor_SetSpeed(float left_front, float right_front, float left_rear, float right_rear);
+void Motor_Stop(void);
 
 #endif

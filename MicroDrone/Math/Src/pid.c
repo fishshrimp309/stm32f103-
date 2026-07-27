@@ -1,6 +1,6 @@
 #include "pid.h"
 
-void PID_Init(pid_struct_t *pid,float kp,float ki,float kd,float i_max,float out_max)
+void PID_Init(PID *pid,float kp,float ki,float kd,float i_max,float out_max)
 {
   pid->kp      = kp;
   pid->ki      = ki;
@@ -9,7 +9,7 @@ void PID_Init(pid_struct_t *pid,float kp,float ki,float kd,float i_max,float out
   pid->out_max = out_max;
 }
 
-float PID_Compute(pid_struct_t *pid, float target, float measure)
+float PID_Compute(PID *pid, float target, float measure)
 {
   pid->target = target;
   pid->measure = measure;
@@ -26,4 +26,14 @@ float PID_Compute(pid_struct_t *pid, float target, float measure)
   pid->output = pid->p_out + pid->i_out + pid->d_out;
   LIMIT_MIN_MAX(pid->output, -pid->out_max, pid->out_max);
   return pid->output;
+}
+
+void pid_clear(PID *pid)
+{
+//  pid->err[0] = 0;
+//  pid->err[1] = 0;
+  pid->i_out  = 0;
+  pid->p_out  = 0;
+  pid->d_out  = 0;
+  pid->output = 0;
 }

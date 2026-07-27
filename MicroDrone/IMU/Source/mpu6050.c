@@ -3,6 +3,7 @@
 #include "MPUI2C.h"
 #include "mpu6050.h"
 #include "string.h" //for reset buffer
+#include "cmsis_os.h"
 
 #define PRINT_ACCEL     (0x01)
 #define PRINT_GYRO      (0x02)
@@ -34,10 +35,7 @@ float Last_DMP_Yaw = 0;  // 记录上一次 DMP 算出的原始 Yaw
 // 假设每次循环大概几毫秒，DMP自身漂移每次一般小于 0.05 度
 #define YAW_DEADZONE 0.2f
 
-
-
-
-
+volatile uint8_t i2c_busy = 0;
 
 
 static unsigned short inv_row_2_scale(const signed char *row) {
@@ -413,3 +411,19 @@ uint8_t MPU_Check_And_Read(void) {
     return 0; // 没数据或读取失败
 }
 //------------------End of File----------------------------
+
+void OS_IMUCallback(void *argument)
+{
+  for(;;)
+  {
+    if(!i2c_busy)
+    {
+      i2c_busy = 1;
+      MPU_Check_And_Read();
+      i2c_busy = 0;
+    }
+    osDelay(1);
+  }
+}
+
+

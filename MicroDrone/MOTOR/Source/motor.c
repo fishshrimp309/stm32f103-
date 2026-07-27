@@ -27,3 +27,11 @@ void Motor_SetSpeed(float left_front, float right_front, float left_rear, float 
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, motor[2]);
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, motor[3]);
 }
+
+void Motor_Stop(void)
+{
+	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 0);
+	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, 0);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_4, 0);
+}

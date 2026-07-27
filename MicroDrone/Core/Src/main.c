@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "i2c.h"
 #include "spi.h"
 #include "tim.h"
@@ -54,29 +55,20 @@
 
 /* USER CODE BEGIN PV */
 
-volatile uint8_t i2c_busy = 0;
-volatile uint8_t control_flag = 0;
+
 volatile uint32_t last_ACK_tick = 0;
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim->Instance == TIM2) {
-        if (!i2c_busy) {
-            control_flag = 1;
-        }
-    }
-}
 
 /* USER CODE END 0 */
 
@@ -110,7 +102,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
-  MX_TIM2_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
@@ -121,14 +112,11 @@ int main(void)
   Motor_Init();
   Control_PID_Init();
 
-  HAL_TIM_Base_Start_IT(&htim2);
   HAL_Delay(50);
 
-  RC_App_Init();
+  RC_Init();
 
   // ==================== 对频连接循环 ====================
-  // 接收端: NF04_Init 已进入 RX 模式并预装 ACK 载荷
-  // 此循环持续重装 ACK 载荷, 等待发送端首次连接成功
   {
       int i;
       RC_Data_Ready_Flag = 0;
@@ -139,7 +127,6 @@ int main(void)
           {
               RC_Data_Ready_Flag = 0;
 
-              /* 连接成功: LED 快闪 3 次 */
               for (i = 0; i < 3; i++)
               {
                   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
@@ -151,7 +138,6 @@ int main(void)
               break;
           }
 
-          /* 重装 ACK 载荷保持配对握手活跃 */
           uint8_t bind_ack[8] = {0xBB, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88};
           NF04_Write_Ack_Payload(bind_ack);
           HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
@@ -162,44 +148,19 @@ int main(void)
 
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      if (control_flag) {
-          control_flag = 0;
-          i2c_busy = 1;
-          MPU_Check_And_Read();
-          Control_Flight_Loop(Target_Roll, Target_Pitch, Target_Yaw, Final_Throttle,
-                              Roll, Pitch, Yaw, Gyro_X, Gyro_Y, Gyro_Z);
-          i2c_busy = 0;
-      }
-
-      if (RC_Data_Ready_Flag == 1)
-      {
-          RC_Data_Ready_Flag = 0;
-          RC_Resolve_Control_Logic();
-          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-      }
-	  
-      if ((HAL_GetTick() - last_ACK_tick) > 50)
-      {
-          last_ACK_tick = HAL_GetTick();
-
-          uint8_t ack[8];
-          ack[0] = 0xBB;
-          ack[1] = (int8_t)Roll;
-          ack[2] = (int8_t)Pitch;
-          ack[3] = (int8_t)Yaw;
-          ack[4] = Final_Throttle & 0xFF;
-          ack[5] = (Final_Throttle >> 8) & 0xFF;
-          ack[6] = 0;
-          ack[7] = 0;
-
-          if (NF04_Send_Packet(ack) == TX_DS) {
-              HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-          }
-      }
 
     /* USER CODE END WHILE */
 
@@ -250,6 +211,28 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM2 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM2)
+  {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

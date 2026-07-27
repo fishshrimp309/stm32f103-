@@ -1,17 +1,22 @@
 #include "control.h"
+#include "motor.h"
+#include "mpu6050.h"
+#include "rc.h"
+#include "pid.h"
+#include "cmsis_os.h"
 
-int16_t Virtual_Throttle = 1000;//停转
+int16_t Virtual_Throttle = 1000;//停转//1080min
 
-pid_struct_t pid_roll_angle;//横滚轴
-pid_struct_t pid_roll_gyro;
-pid_struct_t pid_pitch_angle;//俯仰轴
-pid_struct_t pid_pitch_gyro;
-pid_struct_t pid_yaw_gyro;//偏航轴
+PID pid_roll_angle;//横滚轴
+PID pid_roll_gyro;
+PID pid_pitch_angle;//俯仰轴
+PID pid_pitch_gyro;
+PID pid_yaw_gyro;//偏航轴
 
 void Control_PID_Init()
 {
-	PID_Init(&pid_roll_angle,1, 0, 0, 0.0f, 150.0f);//角度环一般不加积分项
-	PID_Init(&pid_roll_gyro,-1, 0, 0, 50.0f, 250.0f);
+	PID_Init(&pid_roll_angle,0, 0, 0, 0.0f, 150.0f);//角度环一般不加积分项
+	PID_Init(&pid_roll_gyro,-0, 0, 0, 50.0f, 250.0f);
 	
 	PID_Init(&pid_pitch_angle,0, 0, 0, 0.0f, 150.0f);
 	PID_Init(&pid_pitch_gyro,0, 0, 0, 50.0f, 250.0f);
@@ -21,8 +26,8 @@ void Control_PID_Init()
 
 void Control_Mixer_Compute(int16_t throttle, float roll_out, float pitch_out, float yaw_out)
 {
-    int16_t m1 = (int16_t)(throttle + roll_out + pitch_out - yaw_out); // 左前  
-	int16_t m2 = (int16_t)(throttle - roll_out + pitch_out + yaw_out); // 右前
+    int16_t m1 = (int16_t)(throttle - roll_out + pitch_out + yaw_out); // 左前  
+	int16_t m2 = (int16_t)(throttle + roll_out + pitch_out - yaw_out); // 右前
     int16_t m3 = (int16_t)(throttle - roll_out - pitch_out - yaw_out); // 右后
     int16_t m4 = (int16_t)(throttle + roll_out - pitch_out + yaw_out); // 左后
 
@@ -35,9 +40,7 @@ void Control_Mixer_Compute(int16_t throttle, float roll_out, float pitch_out, fl
 }
 
 
-void Control_Flight_Loop(float t_roll, float t_pitch, float t_yaw, int16_t throttle,
-                         float c_roll, float c_pitch, float c_yaw,
-                         float g_x, float g_y, float g_z)
+void Task_ControlCallback(float t_roll, float t_pitch, float t_yaw, int16_t throttle, float c_roll, float c_pitch, float c_yaw, float g_x, float g_y, float g_z)
 {
     float Target_Gyro_Roll  = PID_Compute(&pid_roll_angle,  t_roll,  c_roll);
     float Target_Gyro_Pitch = PID_Compute(&pid_pitch_angle, t_pitch, c_pitch);
@@ -48,4 +51,13 @@ void Control_Flight_Loop(float t_roll, float t_pitch, float t_yaw, int16_t throt
     float yaw_out   = PID_Compute(&pid_yaw_gyro,   Target_Gyro_Yaw,   g_z);
 
 	Control_Mixer_Compute(throttle, roll_out, pitch_out, yaw_out);
+}
+
+void OS_ControlCallback(void *argument)
+{
+  for(;;)
+  {
+    Task_ControlCallback(Target_Roll, Target_Pitch, Target_Yaw, Final_Throttle, Roll, Pitch, Yaw, Gyro_X, Gyro_Y, Gyro_Z);
+    osDelay(1);
+  }
 }

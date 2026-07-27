@@ -21,9 +21,10 @@ typedef struct _pid_struct_t
   float i_out;
   float d_out;
   float output;
-}pid_struct_t;
+}PID;
 
-void PID_Init(pid_struct_t *pid,float kp,float ki,float kd,float i_max,float out_max);
-float  PID_Compute(pid_struct_t *pid, float target, float measure);
+void PID_Init(PID *pid,float kp,float ki,float kd,float i_max,float out_max);
+float PID_Compute(PID *pid, float target, float measure);
+void pid_clear(PID *pid);
 
 #endif
