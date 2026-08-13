@@ -9,8 +9,8 @@
 #endif
 
 // =================== 可调整宏定义参数 ===================
-#define MAX_PORTS       32          // 最大扫描端口数
-#define SEND_INTERVAL   2000          // 定时发送间隔 (单位: ms)
+#define MAX_PORTS       32  w        // 最大扫描端口数
+#define SEND_INTERVAL   50          // 定时发送间隔 (单位: ms)
 
 #define VAL_MIN         0           // 油门值最小值
 #define VAL_MAX         255         // 油门值最大值 (对应STM32端 0~255→1000~2000)
@@ -32,7 +32,7 @@ const int TRACKED_KEYS[] = {
     'E',            // bit 7  - Key_E
     'R',            // bit 8  - Key_R
     'F',            // bit 9  - Key_F
-    'Z',            // bit 10 - Key_Z
+    'I',            // bit 10 - Key_I
     'P',            // bit 11 - Key_P
 };
 const int NUM_TRACKED_KEYS = sizeof(TRACKED_KEYS) / sizeof(TRACKED_KEYS[0]);
@@ -235,6 +235,14 @@ int main() {
                     keyBitmap |= (1 << i);
                 }
             }
+//////////////////////////////////////////////
+            if (GetAsyncKeyState('P') & 0x8000) {
+                if (current_value != 0) {
+                    current_value = 0;
+                    valueChanged = 1;
+                }
+            }
+/////////////////////////////////////////////////////
             int keyChanged = (keyBitmap != lastKeyBitmap);
 
             int needSend = (valueChanged) || keyChanged || (currentTime - lastSendTime >= SEND_INTERVAL);

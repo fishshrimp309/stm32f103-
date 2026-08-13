@@ -4,6 +4,26 @@
 #include <stdint.h>
 #include "main.h"
 
+#define RC_SIZE   8
+#define KEY_COUNT 12
+
+typedef struct {
+    uint32_t key_mask;
+    uint32_t press_time;
+    uint8_t  click_flag;
+} KeyInfo_t;
+
+typedef struct {
+    uint8_t raw_buffer[RC_SIZE];
+    volatile uint8_t rc_data_ready_flag;
+
+    uint32_t current_key;
+    KeyInfo_t keyList[KEY_COUNT];
+    
+    uint8_t isStop_flag;
+    uint8_t isStart_flag;
+} RC;
+
 typedef enum _KeyType
 {
   Key_W     = 1 << 0,
@@ -16,21 +36,18 @@ typedef enum _KeyType
   Key_E     = 1 << 7,
   Key_R     = 1 << 8,
   Key_F     = 1 << 9,
-  Key_Z     = 1 << 10,
+  Key_I     = 1 << 10,
   Key_P     = 1 << 11,
 } KeyType;
 
-typedef struct {
-    uint32_t key_mask;
-    uint32_t press_time;
-    uint8_t  click_flag;
-} KeyInfo_t;
 
-extern volatile uint8_t RC_Data_Ready_Flag;
+
+extern RC rc;
 extern int16_t Target_Roll, Target_Pitch, Target_Yaw, Final_Throttle;
 
 void RC_Init(void);
 void RC_Update_Status_Machine(uint32_t raw_key_value);
 void RC_Resolve_Control_Logic(void);
+void Rc_Handler(void);
 
 #endif

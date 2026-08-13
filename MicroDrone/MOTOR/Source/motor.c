@@ -1,4 +1,5 @@
 #include "motor.h"
+#include "rc.h"
 
 void Motor_Init()
 {
@@ -21,7 +22,14 @@ void Motor_SetSpeed(float left_front, float right_front, float left_rear, float 
 		if(motor[i] < 1000) motor[i] = 1000;
 		if(motor[i] > 2000) motor[i] = 2000;
 	}
-	
+
+	if(rc.isStop_flag == 1)
+	{
+		motor[0] = 0;
+		motor[1] = 0;
+		motor[2] = 0;
+		motor[3] = 0;
+	}
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, motor[0]);
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, motor[1]);
 	__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_3, motor[2]);

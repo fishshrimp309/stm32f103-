@@ -105,27 +105,19 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  MPU6050_initialize();
-  DMP_Init();
-  HAL_Delay(2000);
-
-  Motor_Init();
-  Control_PID_Init();
-
-  HAL_Delay(50);
 
   RC_Init();
 
   // ==================== 对频连接循环 ====================
   {
       int i;
-      RC_Data_Ready_Flag = 0;
+      rc.rc_data_ready_flag = 0;
 
       while (1)
       {
-          if (RC_Data_Ready_Flag == 1)
+          if (rc.rc_data_ready_flag == 1)
           {
-              RC_Data_Ready_Flag = 0;
+              rc.rc_data_ready_flag = 0;
 
               for (i = 0; i < 3; i++)
               {
@@ -145,7 +137,14 @@ int main(void)
       }
   }
   // ======================================================
+  
+  HAL_Delay(500);
+  MPU6050_initialize();
+  DMP_Init();
 
+  Control_PID_Init();
+  Motor_Init();
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */
